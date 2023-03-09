@@ -1,5 +1,5 @@
 {
-    "name": "wdelfuego/nova-calendar",
+    "name": "wdelfuego/nova-calendar-7-evios",
     "description": "A powerful event calendar Tool for Laravel's Nova 4.",
     "keywords": [
         "laravel",
@@ -14,7 +14,7 @@
       "proprietary"
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^7.3|^8.0",
         "illuminate/support": "^8.0|^9.0",
         "laravel/nova": "^4.2.4",
         "wdelfuego/nova-datetime": "^1.0.1"
