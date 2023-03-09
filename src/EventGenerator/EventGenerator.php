@@ -26,7 +26,7 @@ use Wdelfuego\NovaCalendar\Event;
 
 abstract class EventGenerator implements EventGeneratorInterface
 {
-    public static function from(string $novaResourceClass, mixed $toEventSpec) : ?EventGeneratorInterface
+    public static function from(string $novaResourceClass, string $toEventSpec) : ?EventGeneratorInterface
     {
         // Check validity of arguments
         if(!is_subclass_of($novaResourceClass, NovaResource::class))
@@ -70,7 +70,7 @@ abstract class EventGenerator implements EventGeneratorInterface
     private $novaResourceClass = null;
     private $toEventSpec = null;
     
-    public function __construct(string $novaResourceClass = null, mixed $toEventSpec = null)
+    public function __construct(string $novaResourceClass = null, string $toEventSpec = null)
     {
         $this->novaResourceClass = $novaResourceClass;
         $this->toEventSpec = $toEventSpec;
@@ -89,7 +89,7 @@ abstract class EventGenerator implements EventGeneratorInterface
         return $this->novaResourceClass;
     }
     
-    protected function toEventSpec() : mixed
+    protected function toEventSpec() : string
     {
         return $this->toEventSpec;
     }
