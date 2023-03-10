@@ -42,9 +42,12 @@ class NovaCalendar extends Tool
 
     public function menu(Request $request)
     {
-        return MenuSection::make($this->menuLabel)
-            ->icon($this->menuIcon)
-            ->path(config('nova-calendar.uri', 'wdelfuego/nova-calendar'));
+        return MenuSection::make($this->menuLabel, [
+            MenuItem::link('All', '/bookings/calendar/all'),
+            MenuItem::link('Colin', '/bookings/calendar/colin')
+        ])
+        ->icon($this->menuIcon)
+        ->path(config('nova-calendar.uri', 'bookings/calendar'));
         
     }
     

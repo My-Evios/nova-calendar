@@ -67,7 +67,7 @@ class ToolServiceProvider extends ServiceProvider
             return;
         }
 
-        Nova::router(['nova', Authorize::class], config('nova-calendar.uri', 'wdelfuego/nova-calendar'))
+        Nova::router(['nova', Authorize::class], config('nova-calendar.uri', 'bookings/calendar'))
             ->group(__DIR__.'/../routes/inertia.php');
 
         Route::middleware(['nova', Authorize::class])

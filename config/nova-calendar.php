@@ -20,10 +20,10 @@ return [
     /*
      * Custom URI for Nova Calendar (will be appended to your Nova path, /nova by default)
      */
-    'uri' => 'wdelfuego/nova-calendar',
+    'uri' => 'bookings/calendar',
     
     /*
      * Browser window/tab title
      */
-    'title' => 'Nova Calendar',
+    'title' => 'Booking Calendar',
 ];
