@@ -18,6 +18,7 @@ namespace Wdelfuego\NovaCalendar;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Menu\MenuSection;
+use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Tool;
 
