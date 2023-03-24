@@ -25,10 +25,13 @@
                     class="mb-3 w-full block form-control form-select form-select-bordered"
                     v-model="installerId"
                 >
-                    <option value="">Filter installers</option>
-                    <option value="100">John</option>
-                    <option value="101">Eric</option>
-                    <option value="102">Steve</option>
+                    <option
+                        :value="installer.id"
+                        v-if="installers.length > 0"
+                        v-for="(installer, i) in installers"
+                    >
+                        {{ installer.first_name + ' ' + installer.last_name }}
+                    </option>
                 </select>
             </div>
         </div>
@@ -169,6 +172,7 @@
                     default: {color: '#fff', 'background-color': 'rgba(var(--colors-primary-500), 0.9)'}
                 },
                 installerId: null,
+                installers: [],
             }
         },
         methods: {
@@ -176,8 +180,8 @@
                 if (this.installerId === '') {
                     this.installerId = null;
                 }
-                this.month = null;
-                this.year = null;
+                this.month = (new Date()).getMonth() + 1;
+                this.year = (new Date()).getFullYear();
                 this.reload();
             },
             prevMonth() {
@@ -235,6 +239,15 @@
             Nova.addShortcut('alt+h', event => {
                 this.reset();
             });
+
+            Nova.request().get('/api/installers').then(response => {
+                this.installers = response.data.data;
+                this.installers.unshift({
+                    id: null,
+                    first_name: 'Filter',
+                    last_name: 'installers',
+                })
+            })
         },
         props: {
             pageTitle: {
