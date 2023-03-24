@@ -39,6 +39,7 @@ abstract class MonthCalendar implements MonthDataProviderInterface
     protected $firstDayOfWeek;
     protected $year;
     protected $month;
+    protected $installerId;
     
     protected $request = null;    
     
@@ -96,6 +97,13 @@ abstract class MonthCalendar implements MonthDataProviderInterface
     {
         $this->year = $year;
         $this->month = $month;
+        $this->updateViewRanges();
+        return $this;
+    }
+
+    public function setInstallerId(?int $installerid): self
+    {
+        $this->installerId = $installerid;
         $this->updateViewRanges();
         return $this;
     }

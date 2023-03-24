@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 use Wdelfuego\NovaCalendar\Contracts\CalendarDataProviderInterface;
+use Wdelfuego\NovaCalendar\DataProvider\MonthCalendar;
 
 class CalendarController extends BaseController
 {
@@ -30,18 +31,21 @@ class CalendarController extends BaseController
     public function __construct(NovaRequest $request, CalendarDataProviderInterface $dataProvider)
     {
         $this->request = $request;
+        /** @var MonthCalendar dataProvider */
         $this->dataProvider = $dataProvider;
     }
     
-    public function getMonthCalendarData($year = null, $month = null)
+    public function getMonthCalendarData($year = null, $month = null, $installerId = null)
     {
         $year  = is_null($year)  || !is_numeric($year)  ? now()->year  : intval($year);
         $month = is_null($month) || !is_numeric($month) ? now()->month : intval($month);
         
         while($month > 12) { $year += 1; $month -= 12; }
         while($month < 1)  { $year -= 1; $month += 12; }
+
+        $installerId = $installerId === 'null' ? null : $installerId;
         
-        $this->dataProvider->setRequest($this->request)->setYearAndMonth($year, $month);
+        $this->dataProvider->setRequest($this->request)->setYearAndMonth($year, $month)->setInstallerId($installerId);
             
         return [
             'year' => $year,
