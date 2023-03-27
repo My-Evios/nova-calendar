@@ -40,6 +40,8 @@ abstract class MonthCalendar implements MonthDataProviderInterface
     protected $year;
     protected $month;
     protected $installerId;
+    protected $bookingStatus;
+    protected $bookingType;
     
     protected $request = null;    
     
@@ -104,6 +106,20 @@ abstract class MonthCalendar implements MonthDataProviderInterface
     public function setInstallerId(?int $installerid): self
     {
         $this->installerId = $installerid;
+        $this->updateViewRanges();
+        return $this;
+    }
+
+    public function setBookingStatus(?string $bookingStatus): self
+    {
+        $this->bookingStatus = $bookingStatus;
+        $this->updateViewRanges();
+        return $this;
+    }
+
+    public function setBookingType(?string $bookingType): self
+    {
+        $this->bookingType = $bookingType;
         $this->updateViewRanges();
         return $this;
     }

@@ -16,6 +16,7 @@
 
 namespace Wdelfuego\NovaCalendar\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Carbon;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -35,17 +36,21 @@ class CalendarController extends BaseController
         $this->dataProvider = $dataProvider;
     }
     
-    public function getMonthCalendarData($year = null, $month = null, $installerId = null)
+    public function getMonthCalendarData(Request $request)
     {
-        $year  = is_null($year)  || !is_numeric($year)  ? now()->year  : intval($year);
-        $month = is_null($month) || !is_numeric($month) ? now()->month : intval($month);
-        
+        $year = $request->get('year', date('Y'));
+        $month = $request->get('month', date('m'));
         while($month > 12) { $year += 1; $month -= 12; }
         while($month < 1)  { $year -= 1; $month += 12; }
+        $installerId = $request->get('installerId') === 'null' ? null : $request->get('installerId');
+        $bookingStatus = $request->get('bookingStatus') === 'null' ? null : $request->get('bookingStatus');
+        $bookingType = $request->get('bookingType') === 'null' ? null : $request->get('bookingType');
 
-        $installerId = $installerId === 'null' ? null : $installerId;
-        
-        $this->dataProvider->setRequest($this->request)->setYearAndMonth($year, $month)->setInstallerId($installerId);
+        $this->dataProvider->setRequest($this->request)
+            ->setYearAndMonth($year, $month)
+            ->setInstallerId($installerId)
+            ->setBookingStatus($bookingStatus)
+            ->setBookingType($bookingType);
             
         return [
             'year' => $year,

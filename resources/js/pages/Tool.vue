@@ -15,9 +15,8 @@
 <template>
     <div>
         <Head :title="pageTitle"/>
-
         <div class="flex flex-col">
-            <div class="md:w-1/2">
+            <div class="w-full md:w-1/2">
                 <select
                     @change="this.reset"
                     id="level"
@@ -31,6 +30,36 @@
                         v-for="(installer, i) in installers"
                     >
                         {{ installer.first_name + ' ' + installer.last_name }}
+                    </option>
+                </select>
+                <select
+                    @change="this.reset"
+                    id="level"
+                    dusk="level"
+                    class="mb-3 w-full block form-control form-select form-select-bordered"
+                    v-model="bookingStatus"
+                >
+                    <option
+                        :value="bS"
+                        v-if="Object.keys(bookingStatuses).length > 0"
+                        v-for="bS in Object.keys(bookingStatuses)"
+                    >
+                        {{ bookingStatuses[bS] }}
+                    </option>
+                </select>
+                <select
+                    @change="this.reset"
+                    id="level"
+                    dusk="level"
+                    class="mb-3 w-full block form-control form-select form-select-bordered"
+                    v-model="bookingType"
+                >
+                    <option
+                        :value="bT"
+                        v-if="Object.keys(bookingTypes).length > 0"
+                        v-for="bT in Object.keys(bookingTypes)"
+                    >
+                        {{ bookingTypes[bT] }}
                     </option>
                 </select>
             </div>
@@ -172,7 +201,11 @@
                     default: {color: '#fff', 'background-color': 'rgba(var(--colors-primary-500), 0.9)'}
                 },
                 installerId: null,
+                bookingType: null,
+                bookingStatus: null,
                 installers: [],
+                bookingTypes: [],
+                bookingStatuses: [],
             }
         },
         methods: {
@@ -194,15 +227,21 @@
             },
             reload() {
                 let vue = this;
-                Nova.request().get('/nova-vendor/wdelfuego/nova-calendar/calendar-data/' + vue.year + '/' + vue.month + '/' + this.installerId)
-                    .then(response => {
-                        vue.year = response.data.year;
-                        vue.month = response.data.month;
-                        vue.title = response.data.title;
-                        vue.columns = response.data.columns;
-                        vue.weeks = response.data.weeks;
-                        vue.styles = response.data.styles;
-                    });
+
+                Nova.request().post('/nova-vendor/wdelfuego/nova-calendar/calendar-data', {
+                    year: this.year,
+                    month: this.month,
+                    installerId: this.installerId,
+                    bookingType: this.bookingType,
+                    bookingStatus: this.bookingStatus,
+                }).then(response => {
+                    this.year = response.data.year;
+                    this.month = response.data.month;
+                    this.title = response.data.title;
+                    this.columns = response.data.columns;
+                    this.weeks = response.data.weeks;
+                    this.styles = response.data.styles;
+                });
             },
             open(e, url) {
                 if (e.metaKey || e.ctrlKey) {
@@ -247,7 +286,19 @@
                     first_name: 'Filter',
                     last_name: 'installers',
                 })
-            })
+            });
+
+            Nova.request().get('/api/booking-statuses').then(response => {
+                this.bookingStatuses = response.data.data;
+                this.bookingStatuses[null] = 'Filter status';
+                console.log(this.bookingStatuses);
+            });
+
+            Nova.request().get('/api/booking-types').then(response => {
+                this.bookingTypes = response.data.data;
+                this.bookingTypes[null] = 'Filter types';
+                console.log(this.bookingTypes);
+            });
         },
         props: {
             pageTitle: {
