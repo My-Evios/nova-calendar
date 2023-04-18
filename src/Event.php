@@ -35,7 +35,7 @@ class Event
         return $instance;
     }
 
-    public string $originalResource = null;
+    public string $originalResource;
     
     protected $name;
     protected $timezone = null;
