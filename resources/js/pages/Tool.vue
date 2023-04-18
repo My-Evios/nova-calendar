@@ -287,20 +287,20 @@
                 this.installers = response.data.data;
                 this.installers.unshift({
                     id: null,
-                    first_name: 'Filter',
+                    first_name: 'All',
                     last_name: 'installers',
                 })
             });
 
             Nova.request().get('/api/booking-statuses').then(response => {
                 this.bookingStatuses = response.data.data;
-                this.bookingStatuses[null] = 'Filter status';
+                this.bookingStatuses[null] = 'All statuses';
                 console.log(this.bookingStatuses);
             });
 
             Nova.request().get('/api/booking-types').then(response => {
                 this.bookingTypes = response.data.data;
-                this.bookingTypes[null] = 'Filter types';
+                this.bookingTypes[null] = 'All types';
                 console.log(this.bookingTypes);
             });
         },
