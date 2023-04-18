@@ -25,10 +25,17 @@ class Event
 {
     public static function fromResource(NovaResource $resource, string $dateAttributeStart, string $dateAttributeEnd = null) : self
     {
-        return is_null($dateAttributeEnd)
-            ? (new self($resource->title(), $resource->model()->$dateAttributeStart))->withResource($resource)
-            : (new self($resource->title(), $resource->model()->$dateAttributeStart, $resource->model()->$dateAttributeEnd))->withResource($resource);
+        if (is_null($dateAttributeEnd)) {
+            $instance = (new self($resource->title(), $resource->model()->$dateAttributeStart))->withResource($resource);
+        } else {
+            $instance = (new self($resource->title(), $resource->model()->$dateAttributeStart, $resource->model()->$dateAttributeEnd))->withResource($resource);
+        }
+        $instance->originalResource = $resource::class;
+
+        return $instance;
     }
+
+    public string $originalResource = null;
     
     protected $name;
     protected $timezone = null;
