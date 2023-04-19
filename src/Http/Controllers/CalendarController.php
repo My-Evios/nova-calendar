@@ -16,11 +16,10 @@
 
 namespace Wdelfuego\NovaCalendar\Http\Controllers;
 
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Carbon;
 use Laravel\Nova\Http\Requests\NovaRequest;
-
 use Wdelfuego\NovaCalendar\Contracts\CalendarDataProviderInterface;
 use Wdelfuego\NovaCalendar\DataProvider\MonthCalendar;
 
@@ -35,7 +34,21 @@ class CalendarController extends BaseController
         /** @var MonthCalendar dataProvider */
         $this->dataProvider = $dataProvider;
     }
-    
+
+    /**
+     * Handles the basic presentation of the calendar view
+     */
+    public function index()
+    {
+        /** @var User $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        return inertia('NovaCalendar', [
+            'pageTitle' => config('nova-calendar.title', 'Nova Calendar'),
+            'user' => $user,
+        ]);
+    }
+
     public function getMonthCalendarData(Request $request)
     {
         $year = $request->get('year', date('Y'));

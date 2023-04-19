@@ -23,6 +23,7 @@
                     dusk="level"
                     class="mb-3 w-full block form-control form-select form-select-bordered"
                     v-model="installerId"
+                    v-if="user.admin.level > 1"
                 >
                     <option
                         :value="installer.id"
@@ -271,6 +272,8 @@
             }
         },
         mounted() {
+            console.log(this.user);
+
             this.reset();
 
             Nova.addShortcut('alt+right', event => {
@@ -295,13 +298,11 @@
             Nova.request().get('/api/booking-statuses').then(response => {
                 this.bookingStatuses = response.data.data;
                 this.bookingStatuses[null] = 'All statuses';
-                console.log(this.bookingStatuses);
             });
 
             Nova.request().get('/api/booking-types').then(response => {
                 this.bookingTypes = response.data.data;
                 this.bookingTypes[null] = 'All types';
-                console.log(this.bookingTypes);
             });
         },
         props: {
@@ -309,6 +310,11 @@
                 type: String,
                 required: false,
                 default: 'Nova Calendar',
+            },
+            user: {
+                type: Object,
+                required: false,
+                default: {},
             },
         },
     }
