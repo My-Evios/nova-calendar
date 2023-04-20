@@ -37,7 +37,7 @@ abstract class Custom extends EventGenerator
         $query = $this->modelQuery($eloquentModelClass::query(), $rangeStart, $rangeEnd);
         
         $out = [];
-        foreach($query->cursor() as $model)
+        foreach($query->get() as $model)
         {
             $resource = new $novaResourceClass($model);
             foreach($this->resourceToEvents($resource) as $event)
