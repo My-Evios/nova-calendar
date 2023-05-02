@@ -73,7 +73,7 @@ __webpack_require__.r(__webpack_exports__);
       if (e.metaKey || e.ctrlKey) {
         window.open(Nova.url(url));
       } else {
-        Nova.visit(url);
+        window.location.href = '/nova' + url;
       }
     },
     stylesForEvent: function stylesForEvent(event) {
@@ -95,6 +95,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     var _this3 = this;
+    console.log(this.user);
     this.reset();
     Nova.addShortcut('alt+right', function (event) {
       _this3.nextMonth();

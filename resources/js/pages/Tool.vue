@@ -252,7 +252,7 @@
                 if (e.metaKey || e.ctrlKey) {
                     window.open(Nova.url(url))
                 } else {
-                    Nova.visit(url);
+                    window.location.href = '/nova'+url;
                 }
             },
             stylesForEvent(event) {
