@@ -214,19 +214,21 @@ abstract class MonthCalendar implements MonthDataProviderInterface
     
     private function eventDataForDate(Carbon $date) : array
     {
-        $date->setTime(0,0,0);
+        $date->setTime(0,0,0, 0);
         $isFirstDayColumn = ($date->dayOfWeekIso == $this->firstDayOfWeek);
         
         // Get all events that start today, and if the date is the first day of the week
         // also get all multiday events that started before today and end on or after it
         // ('running multiday events')
-        $events = array_filter($this->allEvents(), function($e) use ($date, $isFirstDayColumn) {
-            return $e->start()->isSameDay($date)
+        $events = array_filter($this->allEvents(), function(Event $event) use ($date, $isFirstDayColumn) {
+            return $event->start()->isSameDay($date)
                     ||
-                    ($isFirstDayColumn
-                        && $e->end() 
-                        && $e->start()->isBefore($date) 
-                        && $e->end()->isAfter($date));
+                    (
+                        $isFirstDayColumn
+                        && $event->end()
+                        && $event->start()->isBefore($date)
+                        && $event->end()->isAfter($date->clone()->subDay())
+                    );
         });
 
         // Sort events (as a heuristic, since CSS won't always match event order 
