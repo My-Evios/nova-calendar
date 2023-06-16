@@ -23,7 +23,6 @@
                     dusk="level"
                     class="mb-3 w-full block form-control form-select form-select-bordered"
                     v-model="installerId"
-                    v-if="user.admin.level > 1"
                 >
                     <option
                         :value="installer.id"
