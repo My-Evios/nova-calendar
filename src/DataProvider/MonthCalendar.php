@@ -227,7 +227,7 @@ abstract class MonthCalendar implements MonthDataProviderInterface
                         $isFirstDayColumn
                         && $event->end()
                         && $event->start()->isBefore($date)
-                        && $event->end()->isAfter($date->clone()->subDay())
+                        && $event->end()->gte($date)
                     );
         });
 
