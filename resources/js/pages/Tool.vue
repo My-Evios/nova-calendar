@@ -15,59 +15,52 @@
 <template>
     <div>
         <Head :title="pageTitle"/>
-        <div class="flex flex-row">
-            <div class="md:w-1/4 flex">
-                <select
-                    @change="this.reset"
-                    id="level"
-                    dusk="level"
-                    class="mb-3 w-full block form-control form-select form-select-bordered"
-                    v-model="installerId"
-                >
-                    <option
-                        :value="installer.id"
-                        v-if="installers.length > 0"
-                        v-for="(installer, i) in installers"
-                    >
-                        {{ installer.first_name + ' ' + installer.last_name }}
-                    </option>
-                </select>
+        <div class="show-filter-button" @click="showFilter=!showFilter">Filters</div>
+        <transition
+            @enter="onEnter"
+            @after-enter="onAfterEnter"
+            @leave="onLeave"
+            @before-leave="onBeforeLeave"
+        >
+        <div v-show="showFilter" class="flex flex-row filter-boxes-container">
+            <div class="filter-box-container">
+                <div class="filter-container">
+                    <div class="filter-item" v-for="(installer, i) in installers" :key="i">
+                        <input type="checkbox" :id="installer.id" :value="installer.id" v-model="selectedInstallers" @change="this.reset" />
+                        <label>{{ installer.first_name }} {{ installer.last_name }}</label>
+                    </div>
+                </div>
             </div>
-            <div class="md:w-1/4 flex margin-left">
-                <select
-                    @change="this.reset"
-                    id="level"
-                    dusk="level"
-                    class="mb-3 w-full block form-control form-select form-select-bordered"
-                    v-model="bookingStatus"
-                >
-                    <option
-                        :value="bS"
-                        v-if="Object.keys(bookingStatuses).length > 0"
-                        v-for="bS in Object.keys(bookingStatuses)"
-                    >
-                        {{ bookingStatuses[bS] }}
-                    </option>
-                </select>
+            <div class="filter-box-container">
+                <div class="filter-container">
+                    <div class="filter-item" v-for="status in bookingStatuses" :key="status">
+                        <input
+                        type="checkbox"
+                        :id="`status-${status}`"
+                        :value="status"
+                        v-model="bookingStatus"
+                        @change="this.reset"
+                        />
+                        <label :for="`status-${status}`">{{ capitaliseFirstLetter(status) }}</label>
+                    </div>
+                </div>
             </div>
-            <div class="md:w-1/4 flex margin-left">
-                <select
-                    @change="this.reset"
-                    id="level"
-                    dusk="level"
-                    class="mb-3 w-full block form-control form-select form-select-bordered"
-                    v-model="bookingType"
-                >
-                    <option
-                        :value="bT"
-                        v-if="Object.keys(bookingTypes).length > 0"
-                        v-for="bT in Object.keys(bookingTypes)"
-                    >
-                        {{ bookingTypes[bT] }}
-                    </option>
-                </select>
+            <div class="filter-box-container">
+                <div class="filter-container">
+                    <div class="filter-item" v-for="type in bookingTypes" :key="type">
+                        <input
+                        type="checkbox"
+                        :id="`type-${type}`"
+                        :value="type"
+                        v-model="bookingType"
+                        @change="this.reset"
+                        />
+                        <label :for="`type-${type}`">{{ capitaliseFirstLetter(type) }}</label>
+                    </div>
+                </div>
             </div>
         </div>
+        </Transition>
     </div>
 
     <div id="nc-control">
@@ -205,11 +198,12 @@
                     default: {color: '#fff', 'background-color': 'rgba(var(--colors-primary-500), 0.9)'}
                 },
                 installerId: null,
-                bookingType: null,
-                bookingStatus: null,
-                installers: [],
+                bookingType: [],
+                bookingStatus: [],
+                selectedInstallers: [],
                 bookingTypes: [],
                 bookingStatuses: [],
+                showFilter: false,
             }
         },
         methods: {
@@ -235,10 +229,11 @@
                 Nova.request().post('/nova-vendor/wdelfuego/nova-calendar/calendar-data', {
                     year: this.year,
                     month: this.month,
-                    installerId: this.installerId,
+                    installers: this.selectedInstallers,
                     bookingType: this.bookingType,
                     bookingStatus: this.bookingStatus,
                 }).then(response => {
+                    console.log(response.data)
                     this.year = response.data.year;
                     this.month = response.data.month;
                     this.title = response.data.title;
@@ -268,7 +263,32 @@
                 } else {
                     return this.styles.default;
                 }
-            }
+            },
+            capitaliseFirstLetter(str){
+                return str[0].toUpperCase() + str.slice(1);
+            },
+             onEnter(el) {
+                el.style.transition = 'height 300ms ease, opacity 300ms ease';
+            },
+            onAfterEnter(el) {
+                // cleanup inline styles so layout is natural after animation
+                el.style.transition = '';
+                el.style.height = '';
+                el.style.opacity = '';
+            },
+            onBeforeLeave(el) {
+                // set current height so we can animate back to 0
+                el.style.height = el.scrollHeight + 'px';
+                el.style.opacity = '1';
+                // force reflow
+                // eslint-disable-next-line no-unused-expressions
+                el.offsetHeight;
+            },
+            onLeave(el) {
+                el.style.transition = 'height 300ms ease, opacity 300ms ease';
+                el.style.height = '0px';
+                el.style.opacity = '0';
+            },
         },
         mounted() {
             console.log(this.user);
@@ -287,21 +307,20 @@
 
             Nova.request().get('/api/installers').then(response => {
                 this.installers = response.data.data;
-                this.installers.unshift({
-                    id: null,
-                    first_name: 'All',
-                    last_name: 'installers',
-                })
             });
 
             Nova.request().get('/api/booking-statuses').then(response => {
-                this.bookingStatuses = response.data.data;
-                this.bookingStatuses[null] = 'All statuses';
+                const n = response.data.data;
+                this.bookingStatuses = Object.keys(n)
+                this.bookingStatus = [...this.bookingStatuses];
+                this.reload()
             });
 
             Nova.request().get('/api/booking-types').then(response => {
-                this.bookingTypes = response.data.data;
-                this.bookingTypes[null] = 'All types';
+                const x = response.data.data;
+                this.bookingTypes = Object.keys(x)
+                this.bookingType = [...this.bookingTypes]
+                this.reload()
             });
         },
         props: {

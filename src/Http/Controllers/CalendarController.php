@@ -53,18 +53,24 @@ class CalendarController extends BaseController
     {
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', date('m'));
-        while($month > 12) { $year += 1; $month -= 12; }
-        while($month < 1)  { $year -= 1; $month += 12; }
-        $installerId = $request->get('installerId') === 'null' ? null : $request->get('installerId');
+        while ($month > 12) {
+            $year += 1;
+            $month -= 12;
+        }
+        while ($month < 1) {
+            $year -= 1;
+            $month += 12;
+        }
+        $installerId = $request->get('installers') === 'null' ? null : $request->get('installers');
         $bookingStatus = $request->get('bookingStatus') === 'null' ? null : $request->get('bookingStatus');
         $bookingType = $request->get('bookingType') === 'null' ? null : $request->get('bookingType');
 
         $this->dataProvider->setRequest($this->request)
             ->setYearAndMonth($year, $month)
-            ->setInstallerId($installerId)
+            ->setInstallerIds($installerId)
             ->setBookingStatus($bookingStatus)
             ->setBookingType($bookingType);
-            
+
         return [
             'year' => $year,
             'month' => $month,
@@ -74,8 +80,8 @@ class CalendarController extends BaseController
             'styles' => array_replace_recursive($this->defaultStyles(), $this->dataProvider->eventStyles()),
         ];
     }
-    
-    public function defaultStyles() : array
+
+    public function defaultStyles(): array
     {
         return [
             'default' => [

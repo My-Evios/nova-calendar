@@ -13,7 +13,7 @@
  *     using calendar views, but don't embed this package or a modified version
  *     of it in free or paid-for software libraries and packages aimed at developers).
  */
- 
+
 namespace Wdelfuego\NovaCalendar\DataProvider;
 
 use DateTimeInterface;
@@ -39,19 +39,19 @@ abstract class MonthCalendar implements MonthDataProviderInterface
     protected $firstDayOfWeek;
     protected $year;
     protected $month;
-    protected $installerId;
+    protected $installerIds;
     protected $bookingStatus;
     protected $bookingType;
-    
-    protected $request = null;    
-    
+
+    protected $request = null;
+
     private $startOfCalendar = null;
     private $endOfCalendar = null;
     private $startOfMonth = null;
     private $endOfMonth = null;
-        
+
     private $allEvents = null;
-    
+
     public function __construct(int $year = null, int $month = null)
     {
         $this->firstDayOfWeek = NovaCalendar::MONDAY;
@@ -60,42 +60,39 @@ abstract class MonthCalendar implements MonthDataProviderInterface
         $this->updateViewRanges();
         $this->initialize();
     }
-    
+
     abstract public function novaResources();
 
-    public function initialize(): void
-    {
-        
-    }
-    
+    public function initialize(): void {}
+
     public function timezone(): string
     {
         return config('app.timezone') ?? 'UTC';
     }
-    
-    public function startOfCalendar() : Carbon
+
+    public function startOfCalendar(): Carbon
     {
         return $this->startOfCalendar;
     }
-    
-    public function endOfCalendar() : Carbon
+
+    public function endOfCalendar(): Carbon
     {
         return $this->endOfCalendar;
     }
-    
+
     // Deprecated as of 1.3.1, here for backwards compatibility
-    public function firstDayOfCalendar() : Carbon
+    public function firstDayOfCalendar(): Carbon
     {
         return $this->startOfCalendar();
     }
-            
+
     // Deprecated as of 1.3.1, here for backwards compatibility
-    public function lastDayOfCalendar() : Carbon
+    public function lastDayOfCalendar(): Carbon
     {
         return $this->endOfCalendar();
     }
 
-    public function setYearAndMonth(int $year, int $month) : self
+    public function setYearAndMonth(int $year, int $month): self
     {
         $this->year = $year;
         $this->month = $month;
@@ -103,219 +100,217 @@ abstract class MonthCalendar implements MonthDataProviderInterface
         return $this;
     }
 
-    public function setInstallerId(?int $installerid): self
+    public function setInstallerIds(?array $installerIds): self
     {
-        $this->installerId = $installerid;
+        $this->installerIds = $installerIds;
+
         $this->updateViewRanges();
         return $this;
     }
 
-    public function setBookingStatus(?string $bookingStatus): self
+    public function setBookingStatus(?array $bookingStatus): self
     {
         $this->bookingStatus = $bookingStatus;
         $this->updateViewRanges();
         return $this;
     }
 
-    public function setBookingType(?string $bookingType): self
+    public function setBookingType(?array $bookingType): self
     {
         $this->bookingType = $bookingType;
         $this->updateViewRanges();
         return $this;
     }
 
-    public function startWeekOn(int $dayOfWeekIso) : self
+    public function startWeekOn(int $dayOfWeekIso): self
     {
         $this->firstDayOfWeek = min(NovaCalendar::SUNDAY, max($dayOfWeekIso, NovaCalendar::MONDAY));
         $this->updateViewRanges();
         return $this;
     }
 
-    public function setRequest(Request $request) : self
+    public function setRequest(Request $request): self
     {
         $this->request = $request;
         return $this;
     }
-    
-    public function title() : string
+
+    public function title(): string
     {
         return ucfirst($this->startOfMonth->translatedFormat('F \'y'));
     }
 
-    public function daysOfTheWeek() : array
+    public function daysOfTheWeek(): array
     {
         $out = [];
         $currentDay = new Carbon(Carbon::getDays()[$this->firstDayOfWeek % 7]);
-        for($i = 0; $i < 7; $i++)
-        {
+        for ($i = 0; $i < 7; $i++) {
             $out[] = $currentDay->dayName;
             $currentDay = $currentDay->addDay();
         }
         return $out;
     }
 
-    public function calendarWeeks() : array
+    public function calendarWeeks(): array
     {
         $out = [];
         $dateCursor = $this->startOfCalendar();
 
-        for($i = 0; $i < self::N_CALENDAR_WEEKS; $i++)
-        {
+        for ($i = 0; $i < self::N_CALENDAR_WEEKS; $i++) {
             $week = [];
-            for($j = 0; $j < 7; $j++)
-            {
+            for ($j = 0; $j < 7; $j++) {
                 $calendarDay = CalendarDay::forDateInYearAndMonth($dateCursor, $this->year, $this->month, $this->firstDayOfWeek);
                 $calendarDay = $this->customizeCalendarDay($calendarDay);
                 $week[] = $calendarDay->withEvents($this->eventDataForDate($dateCursor))->toArray();
-                
+
                 $dateCursor = $dateCursor->addDay();
             }
             $out[] = $week;
         }
-        
+
         return $out;
     }
-    
-    public function eventStyles() : array
+
+    public function eventStyles(): array
     {
         return [];
     }
-    
-    protected function customizeEvent(Event $event) : Event
+
+    protected function customizeEvent(Event $event): Event
     {
         return $event;
     }
-    
-    protected function customizeCalendarDay(CalendarDay $day) : CalendarDay
+
+    protected function customizeCalendarDay(CalendarDay $day): CalendarDay
     {
         return $day;
     }
-    
-    protected function nonNovaEvents() : array
+
+    protected function nonNovaEvents(): array
     {
         return [];
     }
-    
+
     protected function urlForResource(NovaResource $resource)
     {
-        return '/resources/' .$resource::uriKey() .'/' .$resource->id;
+        return '/resources/' . $resource::uriKey() . '/' . $resource->id;
     }
 
     // Deprecated, here for BC
-    protected function exclude(NovaResource $resource) : bool
+    protected function exclude(NovaResource $resource): bool
     {
         return $this->excludeResource($resource);
     }
-    
-    protected function excludeResource(NovaResource $resource) : bool
+
+    protected function excludeResource(NovaResource $resource): bool
     {
         return false;
     }
-    
-    private function eventDataForDate(Carbon $date) : array
+
+    private function eventDataForDate(Carbon $date): array
     {
-        $date->setTime(0,0,0, 0);
+        $date->setTime(0, 0, 0, 0);
         $isFirstDayColumn = ($date->dayOfWeekIso == $this->firstDayOfWeek);
-        
+
         // Get all events that start today, and if the date is the first day of the week
         // also get all multiday events that started before today and end on or after it
         // ('running multiday events')
-        $events = array_filter($this->allEvents(), function(Event $event) use ($date, $isFirstDayColumn) {
+        $events = array_filter($this->allEvents(), function (Event $event) use ($date, $isFirstDayColumn) {
             return $event->start()->isSameDay($date)
-                    ||
-                    (
-                        $isFirstDayColumn
-                        && $event->end()
-                        && $event->start()->isBefore($date)
-                        && $event->end()->gte($date)
-                    );
+                ||
+                (
+                    $isFirstDayColumn
+                    && $event->end()
+                    && $event->start()->isBefore($date)
+                    && $event->end()->gte($date)
+                );
         });
 
         // Sort events (as a heuristic, since CSS won't always match event order 
         // between different week rows perfectly due to 'column dense')
-        usort($events, function($a, $b) use ($date, $isFirstDayColumn) { 
+        usort($events, function ($a, $b) use ($date, $isFirstDayColumn) {
 
-            $aDays = min(7,$a->spansDaysFrom($date));
-            $bDays = min(7,$b->spansDaysFrom($date));
+            $aDays = min(7, $a->spansDaysFrom($date));
+            $bDays = min(7, $b->spansDaysFrom($date));
 
             // Longer events first
-            if($aDays != $bDays) { return $bDays - $aDays; }
+            if ($aDays != $bDays) {
+                return $bDays - $aDays;
+            }
 
             // If we're in the first day column and both events span 7 days,
             // let running multi-day events precede events that start today
-            if($isFirstDayColumn && $aDays == 7 && $bDays == 7)
-            {
-                if(!$a->startsEvent($date)) { return -1 ;}
-                if(!$b->startsEvent($date)) { return 1 ;}
+            if ($isFirstDayColumn && $aDays == 7 && $bDays == 7) {
+                if (!$a->startsEvent($date)) {
+                    return -1;
+                }
+                if (!$b->startsEvent($date)) {
+                    return 1;
+                }
                 return 0;
             }
 
             // Events have the same length and don't span 7 full days
             // Let the one that starts earlier come first.
-            return $b->start()->diffInMinutes($a->start(), false); 
+            return $b->start()->diffInMinutes($a->start(), false);
         });
-        
+
         // Finally return the resultant event array, but convert each event to an array
         // that the front-end can use to render the calendar
         return array_map(fn($e): array => $e->toArray($date, $this->startOfMonth, $this->endOfMonth, $this->firstDayOfWeek), $events);
     }
 
-    private function allEvents() : array
+    private function allEvents(): array
     {
-        if(is_null($this->allEvents))
-        {
+        if (is_null($this->allEvents)) {
             $this->loadAllEvents();
         }
-        
+
         return $this->allEvents;
     }
-    
-    private function loadAllEvents() : void
+
+    private function loadAllEvents(): void
     {
         $this->allEvents = [];
-    
+
         // First, fetch events from all Nova resources according to their toEventSpecs as specified in novaResources()
-        foreach($this->novaResources() as $novaResourceClass => $toEventSpec)
-        {
+        foreach ($this->novaResources() as $novaResourceClass => $toEventSpec) {
             $eventGenerator = null;
-            if(!($eventGenerator = EventGenerator::from($novaResourceClass, $toEventSpec)))
-            {
+            if (!($eventGenerator = EventGenerator::from($novaResourceClass, $toEventSpec))) {
                 throw new \Exception("Invalid calendar event specification supplied for Nova resource $novaResourceClass");
             }
-            
-            foreach($eventGenerator->generateEvents($this->startOfCalendar(), $this->endOfCalendar()) as $event)
-            {
-                if($event->resource()->authorizedToView($this->request) && !$this->exclude($event->resource()))
-                {
+
+            foreach ($eventGenerator->generateEvents($this->startOfCalendar(), $this->endOfCalendar()) as $event) {
+                if ($event->resource()->authorizedToView($this->request) && !$this->exclude($event->resource())) {
                     $this->allEvents[] = $event->withUrl($this->urlForResource($event->resource()));
-                } 
+                }
             }
         }
-        
+
         // Second, add the non-nova Events
         $this->allEvents = array_merge($this->allEvents, $this->nonNovaEvents());
-        
+
         // Third, set all event timezones to calendar timezone
-        foreach($this->allEvents as $event)
-        {
+        foreach ($this->allEvents as $event) {
             $event->timezone($this->timezone());
         }
-        
+
         // Finally, run each event through the customizeEvent method
-        $this->allEvents = array_map(fn($e) : Event => $this->customizeEvent($e), $this->allEvents);
+        $this->allEvents = array_map(fn($e): Event => $this->customizeEvent($e), $this->allEvents);
     }
-    
-    private function updateViewRanges() : void
+
+    private function updateViewRanges(): void
     {
         // Calculate month range
-        $this->startOfMonth = Carbon::createFromFormat('Y-m-d H:i:s', $this->year.'-'.$this->month.'-1 00:00:00');
-        $this->endOfMonth = Carbon::createFromFormat('Y-m-d H:i:s', $this->year.'-'.(int)($this->month+1).'-1 00:00:00')->subSeconds(1);
+        $this->startOfMonth = Carbon::createFromFormat('Y-m-d H:i:s', $this->year . '-' . $this->month . '-1 00:00:00');
+        $this->endOfMonth = Carbon::createFromFormat('Y-m-d H:i:s', $this->year . '-' . (int)($this->month + 1) . '-1 00:00:00')->subSeconds(1);
 
         // Calculate calendar range
         $nDaysToSub = ($this->startOfMonth->dayOfWeekIso - ($this->firstDayOfWeek % 7)) % 7;
-        while($nDaysToSub < 0) { $nDaysToSub += 7; }
-        $this->startOfCalendar = $this->startOfMonth->copy()->subDays($nDaysToSub)->setTime(0,0);
+        while ($nDaysToSub < 0) {
+            $nDaysToSub += 7;
+        }
+        $this->startOfCalendar = $this->startOfMonth->copy()->subDays($nDaysToSub)->setTime(0, 0);
         $this->endOfCalendar = $this->startOfCalendar->copy()->addDays(7 * self::N_CALENDAR_WEEKS + 1)->subSeconds(1);
     }
-    
 }
