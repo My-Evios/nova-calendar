@@ -19,7 +19,7 @@
         <div class="show-filter-button" @click="showFilter = !showFilter">Filters</div>
         <transition @enter="onEnter" @after-enter="onAfterEnter" @leave="onLeave" @before-leave="onBeforeLeave">
             <div v-show="showFilter" class="flex flex-row filter-boxes-container">
-                <div v-show="showInstallerFilter" class="filter-box-container">
+                <div v-show="showInstallerFilter" class="filter-box-container thirds">
                     <div class="filter-container">
                         <!-- Internal installers -->
                         <div class="filter-section" v-if="installersInternal.length">
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="filter-box-container">
+                <div class="filter-box-container" :class="showInstallerFilter ? 'thirds' : 'half-and-half'">
                     <div class="filter-container">
                         <div class="filter-item" v-for="status in bookingStatuses" :key="status">
                             <input type="checkbox" :id="`status-${status}`" :value="status" v-model="bookingStatus"
@@ -49,7 +49,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="filter-box-container">
+                <div class="filter-box-container" :class="showInstallerFilter ? 'thirds' : 'half-and-half'">
                     <div class="filter-container">
                         <div class="filter-item" v-for="type in bookingTypes" :key="type">
                             <input type="checkbox" :id="`type-${type}`" :value="type" v-model="bookingType"
@@ -325,20 +325,15 @@ export default {
             this.installersInternal = all.filter(i => !this.isExternalInstaller(i));
             this.installersExternal = all.filter(i => this.isExternalInstaller(i));
 
-            // If the logged-in user is an installer, restrict the list to only their own name
-            const currentUserId = this.user && this.user.id ? this.user.id : null;
-            if (currentUserId) {
-                const myInstaller = all.find(i => i.user_id === currentUserId);
-                if (myInstaller) {
-                    const isExternal = this.isExternalInstaller(myInstaller);
-                    this.installers = [myInstaller];
-                    this.installersInternal = isExternal ? [] : [myInstaller];
-                    this.installersExternal = isExternal ? [myInstaller] : [];
-
-                    // Ensure selection contains only the current installer's id
-                    this.selectedInstallers = [myInstaller.id];
+            this.installers.map(installer => {
+                if (this.user.id === installer.user_id){
+                    installer.user.roles.map(i => {
+                        if (i.name === 'installer' || i.name === 'external-installer'){
+                            this.showInstallerFilter = false;
+                        }
+                    })
                 }
-            }
+            })
         });
 
         Nova.request().get('/api/booking-statuses').then(response => {
