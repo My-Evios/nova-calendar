@@ -18,7 +18,7 @@
         <Head :title="pageTitle" />
         <div class="show-filter-button" @click="showFilter = !showFilter">Filters</div>
         <transition @enter="onEnter" @after-enter="onAfterEnter" @leave="onLeave" @before-leave="onBeforeLeave">
-            <div v-show="showFilter" class="flex flex-row filter-boxes-container">
+            <div v-show="showFilter" class="flex flex-row filter-boxes-container"> V9.24
                 <div v-show="showInstallerFilter" class="filter-box-container thirds">
                     <div class="filter-container">
                         <!-- Internal installers -->
