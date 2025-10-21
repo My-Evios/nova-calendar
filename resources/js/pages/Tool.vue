@@ -328,7 +328,7 @@ export default {
             this.installers.map(installer => {
                 if (this.user.id === installer.user_id){
                     installer.user.roles.map(i => {
-                        if (i.name === 'installer' || i.name === 'external-installer'){
+                        if (i.name === 'installer' || i.name === 'external-installer' && !(i.name === 'super' || i.name === 'admin' || i.name === 'installation-supervisor')){
                             this.showInstallerFilter = false;
                         }
                     })
