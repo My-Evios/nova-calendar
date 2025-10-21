@@ -170,13 +170,24 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _this3.installersExternal = all.filter(function (i) {
         return _this3.isExternalInstaller(i);
       });
-      _this3.installers.map(function (installer) {
+      _this3.installers.forEach(function (installer) {
         if (_this3.user.id === installer.user_id) {
-          installer.user.roles.map(function (i) {
-            if (i.name === 'installer' || i.name === 'external-installer' && !(i.name === 'super' || i.name === 'admin' || i.name === 'installation-supervisor')) {
-              _this3.showInstallerFilter = false;
-            }
+          var roles = installer.user && Array.isArray(installer.user.roles) ? installer.user.roles : [];
+          var roleNames = roles.map(function (r) {
+            return r && r.name;
+          }).filter(Boolean);
+          var isInstallerType = roleNames.includes('installer') || roleNames.includes('external-installer');
+          var hasManagerRole = roleNames.some(function (n) {
+            return ['super', 'admin', 'installation-supervisor'].includes(n);
           });
+
+          // If user is installer-type ONLY (no manager roles) => hide filter
+          // If user is installer-type AND has a manager role => show filter
+          if (isInstallerType && !hasManagerRole) {
+            _this3.showInstallerFilter = false;
+          } else if (isInstallerType && hasManagerRole) {
+            _this3.showInstallerFilter = true;
+          }
         }
       });
     });
