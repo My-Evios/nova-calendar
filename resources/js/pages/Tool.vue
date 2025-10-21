@@ -325,15 +325,23 @@ export default {
             this.installersInternal = all.filter(i => !this.isExternalInstaller(i));
             this.installersExternal = all.filter(i => this.isExternalInstaller(i));
 
-            this.installers.map(installer => {
-                if (this.user.id === installer.user_id){
-                    installer.user.roles.map(i => {
-                        if (i.name === 'installer' || i.name === 'external-installer' && !(i.name === 'super' || i.name === 'admin' || i.name === 'installation-supervisor')){
-                            this.showInstallerFilter = false;
-                        }
-                    })
+            this.installers.forEach(installer => {
+                if (this.user.id === installer.user_id) {
+                    const roles = (installer.user && Array.isArray(installer.user.roles)) ? installer.user.roles : [];
+                    const roleNames = roles.map(r => r && r.name).filter(Boolean);
+
+                    const isInstallerType = roleNames.includes('installer') || roleNames.includes('external-installer');
+                    const hasManagerRole = roleNames.some(n => ['super', 'admin', 'installation-supervisor'].includes(n));
+
+                    // If user is installer-type ONLY (no manager roles) => hide filter
+                    // If user is installer-type AND has a manager role => show filter
+                    if (isInstallerType && !hasManagerRole) {
+                        this.showInstallerFilter = false;
+                    } else if (isInstallerType && hasManagerRole) {
+                        this.showInstallerFilter = true;
+                    }
                 }
-            })
+            });
         });
 
         Nova.request().get('/api/booking-statuses').then(response => {
